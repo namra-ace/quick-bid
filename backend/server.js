@@ -3,12 +3,15 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import protect from "./middleware/authMiddleware.js";
 
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use("/api/auth",authRoutes);
 
 // Simple health check with DB state
 app.get("/api/health", (_req, res) => {
@@ -18,6 +21,11 @@ app.get("/api/health", (_req, res) => {
     dbState: states[mongoose.connection.readyState] ?? mongoose.connection.readyState,
   });
 });
+
+app.get("/api/protected", protect, (req, res) => {
+  res.json({ message: `Hello ${req.user.name}, you have access!` });
+});
+
 
 const PORT = process.env.PORT || 5000;
 
