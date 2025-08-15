@@ -5,13 +5,16 @@ import mongoose from "mongoose";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import protect from "./middleware/authMiddleware.js";
-
+import userRoutes from "./routes/userRoutes.js"
+import categoryRoutes from "./routes/categoryRoutes.js";
 dotenv.config();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth",authRoutes);
+app.use("/api/users",userRoutes);
+app.use("/api/category",categoryRoutes);
 
 // Simple health check with DB state
 app.get("/api/health", (_req, res) => {
