@@ -7,6 +7,8 @@ import authRoutes from "./routes/authRoutes.js";
 import protect from "./middleware/authMiddleware.js";
 import userRoutes from "./routes/userRoutes.js"
 import categoryRoutes from "./routes/categoryRoutes.js";
+import auctionRoutes from "./routes/auctionRoutes.js;"
+
 dotenv.config();
 
 const app = express();
@@ -15,6 +17,7 @@ app.use(express.json());
 app.use("/api/auth",authRoutes);
 app.use("/api/users",userRoutes);
 app.use("/api/category",categoryRoutes);
+app.use("/api/auctions/",auctionRoutes);
 
 // Simple health check with DB state
 app.get("/api/health", (_req, res) => {
