@@ -1,4 +1,3 @@
-// controllers/userController.js
 import User from "../models/User.js";
 import generateToken from "../utils/generateToken.js";
 
@@ -7,7 +6,6 @@ import generateToken from "../utils/generateToken.js";
 // @access Private
 export const getUserProfile = async (req, res) => {
   try {
-    // protect middleware attaches req.user (without password)
     if (!req.user) return res.status(401).json({ message: "Not authorized" });
 
     res.json({
@@ -34,8 +32,7 @@ export const updateUserProfile = async (req, res) => {
 
     const { name, email, password } = req.body;
 
-    // Prevent role changes here; only name/email/password
-    if (email && email !== user.email) {
+    if (email && email.toLowerCase() !== user.email) {
       const exists = await User.findOne({ email: email.toLowerCase() });
       if (exists && exists._id.toString() !== user._id.toString()) {
         return res.status(400).json({ message: "Email already in use" });
@@ -44,7 +41,7 @@ export const updateUserProfile = async (req, res) => {
     }
 
     if (name) user.name = name;
-    if (password) user.password = password; // model pre-save will hash
+    if (password) user.password = password;
 
     const updatedUser = await user.save();
 
@@ -61,8 +58,8 @@ export const updateUserProfile = async (req, res) => {
   }
 };
 
-// ===== Bonus: admin-only list users (useful later) =====
-export const getUsers = async (req, res) => {
+// Admin-only list users (bonus)
+export const getUsers = async (_req, res) => {
   try {
     const users = await User.find({}).select("-password");
     res.json(users);

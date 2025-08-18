@@ -1,14 +1,12 @@
-import express from 'express';
-import { body, validationResult } from 'express-validator';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import express from "express";
+import { body, validationResult } from "express-validator";
+import { registerUser, loginUser } from "../controllers/authController.js";
 
 const router = express.Router();
 
 const validateRequest = (req, res, next) => {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
   next();
 };
 
