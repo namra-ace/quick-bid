@@ -1,5 +1,6 @@
 import Auction from "../models/Auction.js";
 import Bid from "../models/Bid.js";
+import { io } from "../server.js"; // Import the io instance
 
 // Helper
 const computeStatus = (startTime, endTime, now = new Date()) => {
@@ -56,6 +57,13 @@ export const placeBid = async (req, res) => {
     auction.highestBidder = userId;
     await auction.save();
 
+    // Emit event to all clients in the auction room
+    io.to(auction._id.toString()).emit("newBid", {
+      bid,
+      currentPrice: auction.currentPrice,
+      highestBidder: auction.highestBidder,
+    });
+
     res.status(201).json({ message: "Bid placed successfully", bid });
   } catch (error) {
     console.error("Error placing bid:", error);
@@ -73,7 +81,7 @@ export const getBidsForAuction = async (req, res) => {
 
   try {
     const bids = await Bid.find({ auction: id })
-      .populate("bidder", "name email") // ✅ correct fields
+      .populate("bidder", "name email")
       .sort({ createdAt: -1 });
 
     res.json(bids);
