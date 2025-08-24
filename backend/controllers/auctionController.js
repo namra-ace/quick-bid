@@ -130,10 +130,11 @@ export const updateAuction = async (req, res) => {
       return res.status(403).json({ message: "Not authorized to update this auction" });
     }
 
-    let images = auction.images;
+    const oldImages = auction.images;
+    let newImages = [];
 
     if (req.files && req.files.length > 0) {
-      const uploadResults = await Promise.all(
+      newImages = await Promise.all(
         req.files.map(async (file) => {
           try {
             const result = await cloudinary.uploader.upload(file.path, {
@@ -145,37 +146,42 @@ export const updateAuction = async (req, res) => {
           }
         })
       );
-
-      const shouldReplace = replaceImages === "true" || replaceImages === true;
-      if (shouldReplace) {
-        if (auction.images?.length) {
-          await Promise.all(
-            auction.images.map((img) => cloudinary.uploader.destroy(img.publicId))
-          );
-        }
-        images = uploadResults;
-      } else {
-        images = [...auction.images, ...uploadResults];
-      }
     }
-
+    
     // Update fields
     if (title) auction.title = title;
     if (description) auction.description = description;
     if (startingPrice != null) auction.startingPrice = startingPrice;
     if (startTime) auction.startTime = startTime;
     if (endTime) auction.endTime = endTime;
-    auction.images = images;
-
+    
+    const shouldReplace = replaceImages === "true" || replaceImages === true;
+    if (shouldReplace) {
+        auction.images = newImages;
+    } else {
+        auction.images = [...oldImages, ...newImages];
+    }
+    
     // Validate times
     if (new Date(auction.endTime) <= new Date(auction.startTime)) {
+      if (req.files) {
+        req.files.forEach((file) => safeUnlink(file.path));
+      }
       return res.status(400).json({ message: "endTime must be after startTime" });
     }
 
     // Recompute status
     auction.status = computeStatus(auction.startTime, auction.endTime);
 
+    // Save the auction first, then delete old images
     await auction.save();
+
+    if (shouldReplace && oldImages?.length) {
+      await Promise.all(
+        oldImages.map((img) => cloudinary.uploader.destroy(img.publicId))
+      );
+    }
+
     res.json(auction);
   } catch (error) {
     console.error("Error updating auction:", error);

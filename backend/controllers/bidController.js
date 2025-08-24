@@ -43,8 +43,21 @@ export const placeBid = async (req, res) => {
       return res.status(400).json({ message: "Auction is not active" });
     }
 
-    if (Number(amount) <= Number(auction.currentPrice)) {
-      return res.status(400).json({ message: "Bid must be higher than current price" });
+    // Atomically find and update the auction to prevent race conditions
+    const updatedAuction = await Auction.findOneAndUpdate(
+      {
+        _id: id,
+        currentPrice: { $lt: Number(amount) }
+      },
+      {
+        currentPrice: Number(amount),
+        highestBidder: userId,
+      },
+      { new: true }
+    );
+
+    if (!updatedAuction) {
+      return res.status(400).json({ message: "Bid must be higher than the current price or another bid was just placed." });
     }
 
     const bid = await Bid.create({
@@ -53,15 +66,11 @@ export const placeBid = async (req, res) => {
       amount: Number(amount),
     });
 
-    auction.currentPrice = Number(amount);
-    auction.highestBidder = userId;
-    await auction.save();
-
     // Emit event to all clients in the auction room
-    io.to(auction._id.toString()).emit("newBid", {
+    io.to(updatedAuction._id.toString()).emit("newBid", {
       bid,
-      currentPrice: auction.currentPrice,
-      highestBidder: auction.highestBidder,
+      currentPrice: updatedAuction.currentPrice,
+      highestBidder: updatedAuction.highestBidder,
     });
 
     res.status(201).json({ message: "Bid placed successfully", bid });

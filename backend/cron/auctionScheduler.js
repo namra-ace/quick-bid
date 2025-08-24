@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import Auction from "../models/Auction.js";
+import { io } from "../server.js"; // Import the io instance
 
 const startAuctionScheduler = () => {
   console.log("⏱️ Auction scheduler started.");
@@ -13,7 +14,7 @@ const startAuctionScheduler = () => {
       const endedAuctions = await Auction.find({
         endTime: { $lt: now },
         status: "active",
-      });
+      }).populate('highestBidder seller', 'name email');
 
       if (endedAuctions.length > 0) {
         console.log(`✅ Found ${endedAuctions.length} auctions to finalize.`);
@@ -26,9 +27,20 @@ const startAuctionScheduler = () => {
 
         console.log(`✅ Auction '${auction.title}' is now ended.`);
 
-        // TODO: Implement notification logic here
-        // Notify the highest bidder that they won.
-        // Notify the seller that the auction has concluded.
+        // Notify the highest bidder and the seller
+        if (auction.highestBidder) {
+          io.to(auction.highestBidder._id.toString()).emit("auctionEnded", {
+            auctionId: auction._id,
+            message: `Congratulations! You won the auction for "${auction.title}".`,
+          });
+        }
+        
+        if (auction.seller) {
+            io.to(auction.seller._id.toString()).emit("auctionEnded", {
+                auctionId: auction._id,
+                message: `Your auction for "${auction.title}" has ended.`,
+            });
+        }
       }
     } catch (error) {
       console.error("❌ Error in auction scheduler:", error);
