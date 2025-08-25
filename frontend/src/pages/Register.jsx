@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -10,6 +10,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,7 +24,7 @@ const Register = () => {
     }
 
     try {
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -39,6 +41,9 @@ const Register = () => {
       setMessage('Registration successful!');
       console.log('User registered:', data);
       
+      // Redirect to homepage after successful registration
+      navigate('/');
+
     } catch (err) {
       setError(err.message);
       console.error('Registration error:', err);
@@ -50,19 +55,19 @@ const Register = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="bg-white rounded-xl shadow-2xl overflow-hidden md:flex md:max-w-4xl w-full">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-10">
+      <div className="bg-white rounded-xl shadow-2xl overflow-hidden w-full md:flex md:max-w-4xl">
         {/* Left Side: Gradient Background with QuickBid Logo */}
-        <div className="md:w-1/2 bg-gradient-to-br from-indigo-700 to-purple-800 text-white p-10 flex flex-col justify-center items-center">
+        <div className="md:w-1/2 bg-gradient-to-br from-indigo-700 to-purple-800 text-white p-6 md:p-10 flex flex-col justify-center items-center">
           <div className="text-center">
-            <h1 className="text-5xl font-extrabold tracking-tight mb-4">QuickBid</h1>
-            <p className="text-lg font-light opacity-80">Your ultimate destination for online auctions.</p>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight mb-2 md:mb-4">QuickBid</h1>
+            <p className="text-sm md:text-lg font-light opacity-80">Your ultimate destination for online auctions.</p>
           </div>
         </div>
 
         {/* Right Side: Registration Form */}
-        <div className="md:w-1/2 p-10">
-          <h2 className="text-3xl font-bold text-gray-800 text-center mb-6">Create Account</h2>
+        <div className="md:w-1/2 p-6 sm:p-8 md:p-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-4 md:mb-6">Create Account</h2>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label htmlFor="name" className="block text-gray-600 font-medium mb-1">Full Name</label>
@@ -133,8 +138,8 @@ const Register = () => {
             </div>
             <div className="mb-6">
               <span className="block text-gray-600 font-medium mb-2">I am a:</span>
-              <div className="flex justify-around">
-                <label className="inline-flex items-center">
+              <div className="flex flex-col sm:flex-row sm:justify-around">
+                <label className="inline-flex items-center mb-2 sm:mb-0">
                   <input
                     type="radio"
                     className="form-radio text-indigo-600"

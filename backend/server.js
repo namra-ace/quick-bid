@@ -9,7 +9,8 @@ import authRoutes from "./routes/authRoutes.js";
 import bidRoutes from "./routes/bidRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import startAuctionScheduler from "./cron/auctionScheduler.js"; // Import the scheduler
+import startAuctionScheduler from "./cron/auctionScheduler.js";
+import cors from "cors"; // Import cors middleware
 
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ const io = new Server(httpServer, {
 });
 
 // Middleware
+app.use(cors()); // Add this line to enable CORS for all routes
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -55,7 +57,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 httpServer.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
-  startAuctionScheduler(); // Start the cron job
+  startAuctionScheduler();
 });
 
 export { io };
