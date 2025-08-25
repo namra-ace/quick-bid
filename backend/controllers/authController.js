@@ -3,15 +3,19 @@ import generateToken from "../utils/generateToken.js";
 
 // @desc Register a new user
 // @route POST /api/auth/register
+// @desc Register a new user
+// @route POST /api/auth/register
 export const registerUser = async (req, res) => {
-  const { name, email, password /* role */ } = req.body;
+  const { name, email, password, role } = req.body; // <-- Include 'role' here
 
   try {
     const userExists = await User.findOne({ email: email?.toLowerCase() });
     if (userExists) return res.status(400).json({ message: "User already exists" });
 
-    // 🔒 Force safe default role on self-registration
-    const user = await User.create({ name, email: email.toLowerCase(), password, role: "bidder" });
+    // Allow role to be set to "seller" or default to "bidder"
+    const finalRole = (role === "seller") ? "seller" : "bidder";
+
+    const user = await User.create({ name, email: email.toLowerCase(), password, role: finalRole });
 
     res.status(201).json({
       _id: user.id,
