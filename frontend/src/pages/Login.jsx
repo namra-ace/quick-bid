@@ -15,7 +15,7 @@ const Login = () => {
     setError('');
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URLcd }/api/auth/login`, {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,6 +28,9 @@ const Login = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
       }
+
+      // Store the token in local storage
+      localStorage.setItem('token', data.token);
 
       setMessage('Login successful!');
       console.log('User logged in:', data);
@@ -65,7 +68,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
             <div className="mb-6">
@@ -77,12 +80,12 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105"
             >
               Log In
             </button>

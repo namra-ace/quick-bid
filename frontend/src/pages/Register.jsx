@@ -38,6 +38,9 @@ const Register = () => {
         throw new Error(data.message || 'Registration failed');
       }
 
+      // Store the token in local storage
+      localStorage.setItem('token', data.token);
+
       setMessage('Registration successful!');
       console.log('User registered:', data);
       
@@ -78,7 +81,7 @@ const Register = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
             <div className="mb-4">
@@ -90,7 +93,7 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200"
+                className="w-full px-4 py-2 border border-gray-300 rounded-md"
               />
             </div>
             <div className="mb-4">
@@ -103,7 +106,7 @@ const Register = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200 pr-10"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md pr-10"
                 />
                 <button
                   type="button"
@@ -125,7 +128,7 @@ const Register = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200 pr-10"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md pr-10"
                 />
                 <button
                   type="button"
@@ -165,7 +168,7 @@ const Register = () => {
             </div>
             <button
               type="submit"
-              className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              className="w-full bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition duration-300 transform hover:scale-105"
             >
               Sign Up
             </button>
