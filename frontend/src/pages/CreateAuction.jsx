@@ -55,7 +55,7 @@ const CreateAuction = () => {
 
       setMessage('Auction created successfully!');
       setTimeout(() => {
-        navigate('/'); // Redirect to homepage after success
+        navigate(`/auctions/${data._id}`); 
       }, 2000);
 
     } catch (err) {
