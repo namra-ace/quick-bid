@@ -38,20 +38,21 @@ const Register = () => {
         throw new Error(data.message || 'Registration failed');
       }
 
-      // Store the token in local storage
-      localStorage.setItem('token', data.token);
+      // Store the entire user object
+      localStorage.setItem('user', JSON.stringify(data));
 
       setMessage('Registration successful!');
-      console.log('User registered:', data);
       
-      // Redirect to homepage after successful registration
+      // Manually trigger a storage event to update the navbar
+      window.dispatchEvent(new Event("storage"));
+      
       navigate('/');
 
     } catch (err) {
       setError(err.message);
-      console.error('Registration error:', err);
     }
   };
+
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);

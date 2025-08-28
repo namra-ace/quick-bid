@@ -78,11 +78,27 @@ export const createAuction = async (req, res) => {
 };
 
 /**
- * @desc Get all auctions
+ * @desc Get all auctions with filtering
  */
-export const getAllAuctions = async (_req, res) => {
+export const getAllAuctions = async (req, res) => {
   try {
-    const auctions = await Auction.find().sort({ startTime: 1 });
+    const { keyword, status } = req.query;
+
+    // Build the query object
+    const query = {};
+
+    if (keyword) {
+      query.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } },
+      ];
+    }
+
+    if (status) {
+      query.status = status;
+    }
+
+    const auctions = await Auction.find(query).sort({ startTime: 1 });
     res.json(auctions);
   } catch (error) {
     console.error("Error fetching auctions:", error);
@@ -90,14 +106,14 @@ export const getAllAuctions = async (_req, res) => {
   }
 };
 
+
 /**
  * @desc Get auction by ID
  */
 export const getAuctionById = async (req, res) => {
-    const { id } = req.params;
+  const { id } = req.params;
 
   try {
-    // Chain .populate() calls to fetch details for both seller and highestBidder
     const auction = await Auction.findById(id)
       .populate("seller", "name")
       .populate("highestBidder", "name");
@@ -109,9 +125,7 @@ export const getAuctionById = async (req, res) => {
     console.error("Error fetching auction:", error);
     res.status(500).json({ message: "Server error" });
   }
-
 };
-
 
 /**
  * @desc Update auction (seller only)

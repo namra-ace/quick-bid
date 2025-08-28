@@ -8,8 +8,7 @@ const Login = () => {
   const [error, setError] = useState('');
 
   const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
     setError('');
@@ -29,20 +28,21 @@ const Login = () => {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store the token in local storage
-      localStorage.setItem('token', data.token);
+      // Store the entire user object, which includes the token and role
+      localStorage.setItem('user', JSON.stringify(data));
 
       setMessage('Login successful!');
-      console.log('User logged in:', data);
+      
+      // Manually trigger a storage event to update the navbar
+      window.dispatchEvent(new Event("storage"));
 
-      // Redirect to homepage after successful login
       navigate('/');
 
     } catch (err) {
       setError(err.message);
-      console.error('Login error:', err);
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-10">

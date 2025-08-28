@@ -119,40 +119,51 @@ const AuctionDetails = () => {
   }
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString('en-US', {
+    return new Date(dateString).toLocaleString('en-IN', {
       year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
     });
   };
 
+  if (loading) {
+    return <div className="text-center p-10">Loading Details...</div>;
+  }
+  if (error) {
+    return <div className="text-center p-10 text-red-500">{error}</div>;
+  }
+  if (!auction) {
+    return <div className="text-center p-10">Auction not found.</div>;
+  }
+
   return (
-    <div className="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-10">
-      <div className="max-w-6xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden">
+    <div className="py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2">
           <div className="p-4">
-            {auction.images && auction.images.length > 0 ? (
-              <img src={auction.images[0].url} alt={auction.title} className="w-full h-auto object-cover rounded-lg shadow-md" />
-            ) : (
-              <div className="w-full h-80 bg-gray-200 flex items-center justify-center rounded-lg">
-                <p className="text-gray-500">No Image Available</p>
-              </div>
-            )}
+            <img 
+              src={auction.images[0]?.url || 'https://via.placeholder.com/800'} 
+              alt={auction.title} 
+              className="w-full h-auto object-cover rounded-lg" 
+            />
           </div>
+          <div className="p-6 md:p-8 flex flex-col space-y-6">
+            <div>
+              {auction.seller && (
+                <p className="text-sm text-gray-500 mb-1">
+                  Listed by: <span className="font-semibold text-gray-700">{auction.seller.name}</span>
+                </p>
+              )}
+              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">{auction.title}</h1>
+              <p className="text-gray-600 mt-2">{auction.description}</p>
+            </div>
 
-          <div className="p-6 md:p-8 flex flex-col">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-2">{auction.title}</h1>
-            {auction.seller && (
-              <p className="text-sm text-gray-500 mb-4">Sold by: <span className="font-semibold text-gray-700">{auction.seller.name}</span></p>
-            )}
-            <p className="text-gray-600 mb-6">{auction.description}</p>
-
-            <div className="grid grid-cols-2 gap-4 mb-6 text-center">
-              <div className="bg-gray-50 p-4 rounded-lg">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-100 p-4 rounded-lg text-center">
                 <p className="text-sm text-gray-500 font-medium">Starting Price</p>
                 <p className="text-2xl font-bold text-gray-800">₹{(auction.startingPrice || 0).toFixed(2)}</p>
               </div>
-              <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                <p className="text-sm text-green-600 font-medium">Current Bid</p>
-                <p className="text-2xl font-bold text-green-700">₹{(auction.currentPrice || 0).toFixed(2)}</p>
+              <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
+                <p className="text-sm text-green-700 font-medium">Current Bid</p>
+                <p className="text-2xl font-bold text-green-800">₹{(auction.currentPrice || 0).toFixed(2)}</p>
                 {auction.highestBidder ? (
                   <p className="text-xs text-gray-500 mt-1">by {auction.highestBidder.name}</p>
                 ) : (
@@ -161,33 +172,42 @@ const AuctionDetails = () => {
               </div>
             </div>
 
-            <div className="border-t border-b border-gray-200 py-4 mb-6 space-y-2">
-              <p className="text-gray-700"><span className="font-semibold">Auction Starts:</span> {formatDate(auction.startTime)}</p>
-              <p className="text-red-700"><span className="font-semibold">Auction Ends:</span> {formatDate(auction.endTime)}</p>
-              <p className="text-indigo-700"><span className="font-semibold">Status:</span> <span className="capitalize font-medium">{auction.status}</span></p>
+            <div className="border-t border-b border-gray-200 py-4 space-y-2">
+              <p className="text-gray-700 flex justify-between">
+                <span className="font-semibold">Auction Starts:</span> 
+                <span>{formatDate(auction.startTime)}</span>
+              </p>
+              <p className="text-red-700 flex justify-between">
+                <span className="font-semibold">Auction Ends:</span> 
+                <span>{formatDate(auction.endTime)}</span>
+              </p>
+              <p className="text-indigo-700 flex justify-between">
+                <span className="font-semibold">Status:</span> 
+                <span className="capitalize font-medium">{auction.status}</span>
+              </p>
             </div>
 
-            <div className="mt-auto">
-              <h3 className="text-lg font-semibold mb-2">Place Your Bid</h3>
+            <div className="mt-auto bg-gray-50 p-4 rounded-lg">
+              <h3 className="text-lg font-semibold mb-3 text-gray-800">Place Your Bid</h3>
               <form onSubmit={handleBidSubmit}>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                   <input
                     type="number"
                     step="0.01"
                     placeholder={`> ₹${(auction.currentPrice || 0).toFixed(2)}`}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     required
                     min={(auction.currentPrice || 0) + 0.01}
                   />
-                  <button type="submit" className="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700">
-                    Place Bid
+                  <button type="submit" className="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700 transition-colors duration-300 flex-shrink-0">
+                    Bid Now
                   </button>
                 </div>
               </form>
-              {bidSuccess && <p className="mt-2 text-green-600">{bidSuccess}</p>}
-              {bidError && <p className="mt-2 text-red-600">{bidError}</p>}
+              {bidSuccess && <p className="mt-2 text-sm text-green-600">{bidSuccess}</p>}
+              {bidError && <p className="mt-2 text-sm text-red-600">{bidError}</p>}
             </div>
           </div>
         </div>
