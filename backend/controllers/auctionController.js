@@ -94,10 +94,14 @@ export const getAllAuctions = async (_req, res) => {
  * @desc Get auction by ID
  */
 export const getAuctionById = async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
   try {
-    const auction = await Auction.findById(id);
+    // Chain .populate() calls to fetch details for both seller and highestBidder
+    const auction = await Auction.findById(id)
+      .populate("seller", "name")
+      .populate("highestBidder", "name");
+      
     if (!auction) return res.status(404).json({ message: "Auction not found" });
 
     res.json(auction);
@@ -105,7 +109,9 @@ export const getAuctionById = async (req, res) => {
     console.error("Error fetching auction:", error);
     res.status(500).json({ message: "Server error" });
   }
+
 };
+
 
 /**
  * @desc Update auction (seller only)
